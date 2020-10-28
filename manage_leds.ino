@@ -47,6 +47,7 @@ void check_pt() {
   if (outputValue != brightness) {
     brightness = outputValue;
     strip.setBrightness(brightness); // Set BRIGHTNESS to about (max = 255)
+    strip.show();
   }
 }
 
@@ -66,6 +67,7 @@ void setup() {
   // Inicializamos nuestra cinta led RGB
   strip.begin();
   strip.setBrightness(brightness);
+  strip.show();
   setColour(array_colours.get_actual_value());
 }
 
@@ -80,7 +82,8 @@ void loop() {
   }
 
   check_pt();
-  strip.setBrightness(10);  //FIXME BORRRARs
+  strip.setBrightness(10);  strip.show();  //FIXME BORRRARs
+
 
   staticColour(array_colours.get_actual_value(), 500); // Blue
   array_colours.next_index();
