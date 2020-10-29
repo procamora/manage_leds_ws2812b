@@ -50,17 +50,6 @@ MyArray<uint32_t> set_array_colours() {
 }
 
 
-void setColour(uint32_t colour) {
-  for (int pixel = 0; pixel < NUMPIXELS; pixel++) {
-    strip.setPixelColor(pixel, colour); // Brillo moderado en celeste
-    strip.show();   // Mostramos y actualizamos el color del pixel de nuestra cinta led RGB
-  }
-}
-
-
-
-
-
 // Some functions of our own for creating animated effects -----------------
 
 // Fill strip pixels one after another with a color. Strip is NOT cleared
@@ -68,7 +57,8 @@ void setColour(uint32_t colour) {
 // (as a single 'packed' 32-bit value, which you can get by calling
 // strip.Color(red, green, blue) as shown in the loop() function above),
 // and a delay time (in milliseconds) between pixels.
-void colorWipe(uint32_t color, int wait) {
+void colorWipe(uint32_t color) {
+  int wait = 50;
   for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
     strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
     strip.show();                          //  Update strip to match
@@ -79,7 +69,8 @@ void colorWipe(uint32_t color, int wait) {
 // Theater-marquee-style chasing lights. Pass in a color (32-bit value,
 // a la strip.Color(r,g,b) as mentioned above), and a delay time (in ms)
 // between frames.
-void theaterChase(uint32_t color, int wait) {
+void theaterChase(uint32_t color) {
+  int wait = 50;
   for (int a = 0; a < 10; a++) { // Repeat 10 times...
     for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
       strip.clear();         //   Set all pixels in RAM to 0 (off)
@@ -94,7 +85,8 @@ void theaterChase(uint32_t color, int wait) {
 }
 
 // Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
-void rainbow(int wait) {
+void rainbow() {
+  int wait = 10;
   // Hue of first pixel runs 5 complete loops through the color wheel.
   // Color wheel has a range of 65536 but it's OK if we roll over, so
   // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
@@ -118,7 +110,8 @@ void rainbow(int wait) {
 }
 
 // Rainbow-enhanced theater marquee. Pass delay time (in ms) between frames.
-void theaterChaseRainbow(int wait) {
+void theaterChaseRainbow() {
+  int wait = 50;
   int firstPixelHue = 0;     // First pixel starts at red (hue 0)
   for (int a = 0; a < 30; a++) { // Repeat 30 times...
     for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
@@ -140,7 +133,8 @@ void theaterChaseRainbow(int wait) {
 }
 
 
-void staticColour(uint32_t color, int wait) {
+void staticColour(uint32_t color) {
+  int wait = 500;
   strip.fill(color, 0,  strip.numPixels());
   strip.show();                          //  Update strip to match
 
@@ -152,7 +146,6 @@ void staticColour(uint32_t color, int wait) {
     }*/
   delay(wait);                 // Pause for a moment
 }
-
 
 
 

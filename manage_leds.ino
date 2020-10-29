@@ -16,20 +16,21 @@ void change_colour() {
   //Serial.println(String(millis()) + "   " + String(timeCounter + timeThreshold));
   if (millis() > timeCounter + timeThreshold) {
     timeCounter = millis();
-    // Serial.println("exit_bucle");
-    //num_colour = true;
-    setColour(array_colours.get_actual_value());
     array_colours.next_index();
+
+    // TODO ES POSIBLE QUE TENGA QUE REDUCIR EL mode_strip ANTES DE LLAMAR A LA FUNCION PARA QUE VUELVA A ENTRAR EN EL MISMO CASE
+    // mode_strip = (mode_strip - 1) % 5;
+    change_mode_led();
   }
 }
 
 void change_mode() {
-  counter++;
+  //counter++;
   //Serial.println(String(millis()) + "   " + String(timeCounter + timeThreshold));
   if (millis() > timeCounter + timeThreshold) {
     timeCounter = millis();
-    // Serial.println("exit_bucle");
-    num_colour = true;
+
+    change_mode_led();
   }
 }
 
@@ -52,10 +53,39 @@ void check_pt() {
 }
 
 
+
+void change_mode_led() {
+  strip.clear();
+
+  switch (mode_strip) {
+    case 0:
+      colorWipe(array_colours.get_actual_value());
+      break;
+    case 1:
+      theaterChase(array_colours.get_actual_value());
+      break;
+    case 2:
+      rainbow();
+      break;
+    case 3:
+      theaterChaseRainbow();
+      break;
+    case 4:
+      staticColour(array_colours.get_actual_value());
+      break;
+    default:
+      // statements
+      break;
+  }
+  mode_strip = (mode_strip + 1) % 5;
+}
+
+
+
 void setup() {
   Serial.begin(9600);
-  num_colour = false;
-  num_mode = false;
+  //num_colour = false;
+  // num_mode = false;
 
   pinMode(BUTTON_COLOUR, INPUT);
   pinMode(BUTTON_MODE, INPUT);
@@ -68,7 +98,7 @@ void setup() {
   strip.begin();
   strip.setBrightness(brightness);
   strip.show();
-  setColour(array_colours.get_actual_value());
+  staticColour(strip.Color(0, 150, 150));
 }
 
 
@@ -82,23 +112,12 @@ void loop() {
   }
 
   check_pt();
+
   strip.setBrightness(10);  strip.show();  //FIXME BORRRARs
 
+  change_mode_led();  //FIXME BORRRARs
 
-  staticColour(array_colours.get_actual_value(), 500); // Blue
-  array_colours.next_index();
+  array_colours.next_index();  //FIXME BORRRARs
 
-  // Fill along the length of the strip in various colors...
-  colorWipe(array_colours.get_actual_value(), 50); // Blue
-
-  array_colours.next_index();
-
-  // Do a theater marquee effect in various colors...
-  theaterChase(array_colours.get_actual_value(), 50); // Blue, half brightness
-
-  rainbow(10);             // Flowing rainbow cycle along the whole strip
-  theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
-
-
-  delay(100);
+  delay(500);
 }

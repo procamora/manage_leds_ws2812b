@@ -20,3 +20,5 @@ volatile bool num_colour = false; //variable usada en interupciones
 volatile bool num_mode = false; //variable usada en interupciones
 
 short brightness = 50;
+
+short mode_strip = 0;
