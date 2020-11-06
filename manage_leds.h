@@ -1,14 +1,13 @@
 #include <Adafruit_NeoPixel.h>
-#include <avr/power.h>
+
 
 #include "myarray.h"
-
-//#include "ws2812b.h"
-
+#include "telegram.h"
 
 
-#define BUTTON_COLOUR 2    // the number of the pushbutton pin
-#define BUTTON_MODE 3    // the number of the pushbutton pin
+
+#define BUTTON_COLOUR D5    // the number of the pushbutton pin
+#define BUTTON_MODE D6    // the number of the pushbutton pin
 
 
 #define PIN_BRIGHTNESS A0
@@ -30,7 +29,7 @@ short mode_strip = 0;
 
 
 //Designamos nuestro pin de datos
-#define PIN_LEDS 6
+#define PIN_LEDS D7
 
 //Designamos cuantos pixeles tenemos en nuestra cinta led RGB
 #define NUMPIXELS     5
@@ -100,16 +99,50 @@ void colorWipe(uint32_t color) {
 // between frames.
 void theaterChase(uint32_t color) {
   int wait = 50;
-  for (int a = 0; a < 100; a++) { // Repeat 10 times...
-    for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
-      strip.clear();         //   Set all pixels in RAM to 0 (off)
-      // 'c' counts up from 'b' to end of strip in steps of 3...
-      for (int c = b; c < strip.numPixels(); c += 3) {
+  do {
+    for (int a = 0; a < 100; a++) { // Repeat 10 times...
+      for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
+        strip.clear();         //   Set all pixels in RAM to 0 (off)
+        // 'c' counts up from 'b' to end of strip in steps of 3...
+        for (int c = b; c < strip.numPixels(); c += 3) {
+          if (stop_mode) {
+            stop_mode = false;
+            return;
+          }
+          strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
+        }
+        strip.show(); // Update strip with new contents
+        delay(wait);  // Pause for a moment
+      }
+    }
+  } while (true);
+}
+
+// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
+void rainbow() {
+  int wait = 10;
+  while (true) {
+    // Hue of first pixel runs 5 complete loops through the color wheel.
+    // Color wheel has a range of 65536 but it's OK if we roll over, so
+    // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
+    // means we'll make 5*65536/256 = 1280 passes through this outer loop:
+    for (long firstPixelHue = 0; firstPixelHue < 5 * 65536; firstPixelHue += 256) {
+      Serial.println("rainbow-----------------");
+      for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
         if (stop_mode) {
           stop_mode = false;
           return;
         }
-        strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
+        // Offset pixel hue by an amount to make one full revolution of the
+        // color wheel (range of 65536) along the length of the strip
+        // (strip.numPixels() steps):
+        int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
+        // strip.ColorHSV() can take 1 or 3 arguments: a hue (0 to 65535) or
+        // optionally add saturation and value (brightness) (each 0 to 255).
+        // Here we're using just the single-argument hue variant. The result
+        // is passed through strip.gamma32() to provide 'truer' colors
+        // before assigning to each pixel:
+        strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
       }
       strip.show(); // Update strip with new contents
       delay(wait);  // Pause for a moment
@@ -117,41 +150,12 @@ void theaterChase(uint32_t color) {
   }
 }
 
-// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
-void rainbow() {
-  int wait = 10;
-  // Hue of first pixel runs 5 complete loops through the color wheel.
-  // Color wheel has a range of 65536 but it's OK if we roll over, so
-  // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
-  // means we'll make 5*65536/256 = 1280 passes through this outer loop:
-  for (long firstPixelHue = 0; firstPixelHue < 5 * 65536; firstPixelHue += 256) {
-    Serial.println("rainbow-----------------");
-    for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
-      if (stop_mode) {
-        stop_mode = false;
-        return;
-      }
-      // Offset pixel hue by an amount to make one full revolution of the
-      // color wheel (range of 65536) along the length of the strip
-      // (strip.numPixels() steps):
-      int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
-      // strip.ColorHSV() can take 1 or 3 arguments: a hue (0 to 65535) or
-      // optionally add saturation and value (brightness) (each 0 to 255).
-      // Here we're using just the single-argument hue variant. The result
-      // is passed through strip.gamma32() to provide 'truer' colors
-      // before assigning to each pixel:
-      strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
-    }
-    strip.show(); // Update strip with new contents
-    delay(wait);  // Pause for a moment
-  }
-}
-
 // Rainbow-enhanced theater marquee. Pass delay time (in ms) between frames.
 void theaterChaseRainbow() {
   int wait = 50;
   int firstPixelHue = 0;     // First pixel starts at red (hue 0)
-  for (int a = 0; a < 30; a++) { // Repeat 30 times...
+  while (true) {
+    //for (int a = 0; a < 30; a++) { // Repeat 30 times...
     for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
       strip.clear();         //   Set all pixels in RAM to 0 (off)
       // 'c' counts up from 'b' to end of strip in increments of 3...
@@ -163,7 +167,7 @@ void theaterChaseRainbow() {
         // hue of pixel 'c' is offset by an amount to make one full
         // revolution of the color wheel (range 65536) along the length
         // of the strip (strip.numPixels() steps):
-        int      hue   = firstPixelHue + c * 65536L / strip.numPixels();
+        int hue = firstPixelHue + c * 65536L / strip.numPixels();
         uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
         strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
       }
@@ -176,7 +180,7 @@ void theaterChaseRainbow() {
 
 
 void staticColour(uint32_t color) {
-  strip.fill(color, 0,  strip.numPixels());
+  strip.fill(color, 0, strip.numPixels());
   strip.show();                          //  Update strip to match
 
 
