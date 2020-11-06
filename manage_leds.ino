@@ -1,8 +1,8 @@
 /**
   @file manage_leds.ino
   @brief Gestion de leds
-  @author Pablo Rocamora pablojoserocamora@gmail.com
-  @date 14/12/2020
+  @author Pablo Rocamora pablojoserocamora@gmail.com (aka procamora)
+  @date 14/10/2020
 */
 
 #include "manage_leds.h"
@@ -11,7 +11,7 @@
 MyArray<uint32_t> array_colours = set_array_colours();
 
 
-void change_colour1() {
+ICACHE_RAM_ATTR void change_colour1() {
   if (millis() > timeCounter + timeThreshold) {
     timeCounter = millis();
     is_change_colour = true;
@@ -19,7 +19,7 @@ void change_colour1() {
   }
 }
 
-void change_mode1() {
+ICACHE_RAM_ATTR void change_mode1() {
   if (millis() > timeCounter + timeThreshold) {
     timeCounter = millis();
     is_change_mode = true;
@@ -28,7 +28,8 @@ void change_mode1() {
 }
 
 void change_colour() {
-  Serial.println("change_colour...");
+  //if (MODO_DEBUG)
+  //  Serial.println("change_colour...");
   //counter++;
   //Serial.println(String(millis()) + "   " + String(timeCounter + timeThreshold));
 
@@ -36,13 +37,15 @@ void change_colour() {
 
   // TODO ES POSIBLE QUE TENGA QUE REDUCIR EL mode_strip ANTES DE LLAMAR A LA FUNCION PARA QUE VUELVA A ENTRAR EN EL MISMO CASE
   //mode_strip = (mode_strip - 1) % 5;
-  Serial.println(mode_strip);
+  //if (MODO_DEBUG)
+  // Serial.println(mode_strip);
   change_mode_led(false);
 
 }
 
 void change_mode() {
-  Serial.println("change_mode...");
+  /*if (MODO_DEBUG)
+    Serial.println("change_mode...");*/
   change_mode_led(true);
 }
 
@@ -60,7 +63,7 @@ void check_pt() {
   //int outputValue = map(sensorValue, 0, 1023, 200, 2000);  //Map Potentiometer range to frequency range
   //sensorValue = sensorValue >> 2; //Map Potentiometer range to 8 bit binary range - this is faster and uses less flash
   if (outputValue != brightness) {
-    if ( outputValue < 20) // if set to 0 britgness after imposible on
+    if (outputValue < 20) // if set to 0 britgness after imposible on
       outputValue = 20;
     brightness = outputValue;
     strip.setBrightness(brightness); // Set BRIGHTNESS to about (max = 255)
@@ -69,10 +72,9 @@ void check_pt() {
 }
 
 
-
 void change_mode_led(bool update_mode) {
-
-  Serial.println("change_mode_led...");
+  if (MODO_DEBUG)
+    Serial.println("change_mode_led...");
   if (update_mode)
     mode_strip = (mode_strip + 1) % 5;
 
@@ -80,26 +82,32 @@ void change_mode_led(bool update_mode) {
 
   strip.clear();
 
-  Serial.println(mode_strip);
+  if (MODO_DEBUG)
+    Serial.println(mode_strip);
   switch (mode_strip) {
     case 0:
-      Serial.println("colorWipe...");
+      if (MODO_DEBUG)
+        Serial.println("colorWipe...");
       colorWipe(array_colours.get_actual_value());
       break;
     case 1:
-      Serial.println("theaterChase...");
+      if (MODO_DEBUG)
+        Serial.println("theaterChase...");
       theaterChase(array_colours.get_actual_value());
       break;
     case 2:
-      Serial.println("rainbow...");
+      if (MODO_DEBUG)
+        Serial.println("rainbow...");
       rainbow();
       break;
     case 3:
-      Serial.println("theaterChaseRainbow...");
+      if (MODO_DEBUG)
+        Serial.println("theaterChaseRainbow...");
       theaterChaseRainbow();
       break;
     case 4:
-      Serial.println("staticColour...");
+      if (MODO_DEBUG)
+        Serial.println("staticColour...");
       staticColour(array_colours.get_actual_value());
       break;
     default:
@@ -109,13 +117,44 @@ void change_mode_led(bool update_mode) {
 
 }
 
+void connect_wifi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  //secured_client.setTrustAnchors(&cert); // Add root certificate for api.telegram.org
+
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  if (MODO_DEBUG) {
+    Serial.print("\nWiFi connected. IP address: ");
+    Serial.println(WiFi.localIP());
+  }
+  /*
+    Serial.print("Retrieving time: ");
+    configTime(0, 0, "pool.ntp.org"); // get UTC time via NTP
+    time_t now = time(nullptr);
+    while (now < 24 * 3600) {
+    Serial.print(".");
+    delay(100);
+    now = time(nullptr);
+    }
+    Serial.println(now);
+  */
+}
 
 
+// cppcheck-suppress unusedFunction
 void setup() {
-  Serial.begin(9600);
-  //num_colour = false;
+  Serial.begin(115200);
+  Serial.println();
+  //num_colour = false;r
   // num_mode = false;
-  Serial.println("start");
+  Serial.println("start1");
+
+
+  connect_wifi();
+
+
 
   pinMode(BUTTON_COLOUR, INPUT);
   pinMode(BUTTON_MODE, INPUT);
@@ -125,7 +164,13 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_COLOUR), change_colour1, FALLING); //
   attachInterrupt(digitalPinToInterrupt(BUTTON_MODE), change_mode1, FALLING); //
 
+
   Serial.println("start2");
+
+
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
 
   // Inicializamos nuestra cinta led RGB
   strip.begin();
@@ -134,29 +179,30 @@ void setup() {
   staticColour(array_colours.get_actual_value());
   Serial.println("start3");
   //cascade(strip.Color(150, 0 , 0));
+
+  Serial.println("start3");
+
 }
 
 
-
+// cppcheck-suppress unusedFunction
 void loop() {
-  check_pt();
+  
 
-  if (is_change_colour) {
+    
+
+    check_pt();
+
+    if (is_change_colour) {
     is_change_colour = false;
     change_colour();
-  }
+    }
 
-  if (is_change_mode) {
+    if (is_change_mode) {
     is_change_mode = false;
     change_mode();
-  }
+    }
 
-  //strip.setBrightness(10);  strip.show();  //FIXME BORRRARs
-
-  //change_mode_led();  //FIXME BORRRARs
-  //change_colour();
-
-  //array_colours.next_index();  //FIXME BORRRARs
-  //Serial.println("...");
-  delay(50);
+  Serial.println("...");
+  delay(500);
 }
