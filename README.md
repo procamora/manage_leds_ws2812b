@@ -2,6 +2,14 @@
 
 
 
+
+![Esquema](docs/esquema.png)
+![pcb](docs/pcb.png)
+![pcb_3d](docs/pcb_3d.png)
+
+
+
+
 https://arduino.github.io/arduino-cli/latest/getting-started/
 
 ```bash
