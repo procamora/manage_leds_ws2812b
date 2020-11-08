@@ -8,18 +8,6 @@
 
 
 
-#define BUTTON_COLOUR D5    // the number of the pushbutton pin
-#define BUTTON_MODE D6    // the number of the pushbutton pin
-
-//Designamos nuestro pin de datos
-#define PIN_LEDS D7
-
-//Designamos cuantos pixeles tenemos en nuestra cinta led RGB
-#define NUMPIXELS     5
-
-#define PIN_BRIGHTNESS A0
-
-
 const int timeThreshold = 500;
 unsigned long counter = 0;
 long timeCounter = 0;
@@ -57,18 +45,11 @@ MyArray<uint32_t> set_array_colours() {
 
   // pixels.Color toma valores en RGB, desde 0,0,0 hasta 255,255,255
   array_colours.add(green);
-
   array_colours.add(red);
-
-
   array_colours.add(blue);
-
   array_colours.add(yellow);
-
   array_colours.add(purple);
-
   array_colours.add(sky_blue);
-
   array_colours.add(white);
   return array_colours;
 }
@@ -197,16 +178,22 @@ void staticColour(uint32_t color) {
 }
 
 
-/*
-  void cascade(uint32_t color) {
-  for (int j = 0; j < 5; j++) {
-    for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
-      strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
-      strip.show();                          //  Update strip to match
+
+void cascade(uint32_t color) {
+  while (true) {
+    for (int j = 0; j < 5; j++) {
+      for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
+        if (stop_mode) {
+          stop_mode = false;
+          return;
+        }
+        strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+        strip.show();                          //  Update strip to match
+      }
+      strip.clear();
+      delay(50);
     }
-    strip.clear();
-    delay(50);
   }
-  }*/
+}
 
 #endif

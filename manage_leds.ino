@@ -5,10 +5,8 @@
   @date 14/10/2020
 */
 
-#include "credentials.h"
-#include "myarray.h"
-#include "telegram.h"
-#include "manage_ws2812b.h"
+
+#include "manage_leds.h"
 
 MyArray<uint32_t> array_colours = set_array_colours();
 
@@ -125,6 +123,14 @@ void change_mode_led(bool update_mode) {
 
 }
 
+void setup1() {
+  Serial.print(".");
+}
+
+void setup2() {
+  Serial.print(".");
+}
+
 
 // cppcheck-suppress unusedFunction
 void setup() {
@@ -142,17 +148,15 @@ void setup() {
 
   // Inicializamos nuestra cinta led RGB
   strip.begin();
-
-  //check_pt();
-  //strip.setBrightness(brightness);
-  //strip.show();
+  check_pt();
   staticColour(red);
-  
-  
+
+
   Serial.println("start3");
   //cascade(strip.Color(150, 0 , 0));
 
-  
+
+  /*
     // attempt to connect to Wifi network:
     Serial.print("Connecting to Wifi SSID ");
     Serial.print(WIFI_SSID);
@@ -160,8 +164,8 @@ void setup() {
     secured_client.setTrustAnchors(&cert); // Add root certificate for api.telegram.org
 
     while (WiFi.status() != WL_CONNECTED)  {
-    Serial.print(".");
-    delay(500);
+      Serial.print(".");
+      delay(500);
     }
     Serial.print("\nWiFi connected. IP address: ");
     Serial.println(WiFi.localIP());
@@ -171,21 +175,22 @@ void setup() {
     configTime(0, 0, "pool.ntp.org"); // get UTC time via NTP
     time_t now = time(nullptr);
     while (now < 24 * 3600)  {
-    Serial.print(".");
-    delay(100);
-    now = time(nullptr);
+      Serial.print(".");
+      delay(100);
+      now = time(nullptr);
     }
     Serial.println(now);
 
     bot.sendMessage(ID_ADMIN, "starting bot", "");
-    staticColour(array_colours.get_actual_value());
-  
+  */
+  staticColour(array_colours.get_actual_value());
+
 }
 
-// cppcheck-suppress unusedFunction
-void loop() {
-  /*
-    if (millis() - bot_lasttime > BOT_MTBS)  {
+/*
+void checkNewMessages() {
+  if (millis() - bot_lasttime > BOT_MTBS)  {
+    Serial.println(millis());
     int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
 
     while (numNewMessages)    {
@@ -195,8 +200,15 @@ void loop() {
     }
 
     bot_lasttime = millis();
-    }
-  */
+    Serial.println(millis());
+    Serial.println();
+    Serial.println();
+    Serial.println();
+    Serial.println();
+  }
+}*/
+
+void checkChanges() {
   check_pt();
 
   if (is_change_colour) {
@@ -208,5 +220,11 @@ void loop() {
     is_change_mode = false;
     change_mode();
   }
+}
 
+
+// cppcheck-suppress unusedFunction
+void loop() {
+  //checkNewMessages();
+  checkChanges();
 }

@@ -5,7 +5,6 @@
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
 
-#define MODO_DEBUG true
 #include "credentials.h"
 
 
