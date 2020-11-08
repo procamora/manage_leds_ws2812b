@@ -5,10 +5,15 @@
   @date 14/10/2020
 */
 
-#include "manage_leds.h"
-
+#include "credentials.h"
+#include "myarray.h"
+#include "telegram.h"
+#include "manage_ws2812b.h"
 
 MyArray<uint32_t> array_colours = set_array_colours();
+
+
+
 
 
 ICACHE_RAM_ATTR void change_colour1() {
@@ -44,11 +49,10 @@ void change_colour() {
 }
 
 void change_mode() {
-  /*if (MODO_DEBUG)
-    Serial.println("change_mode...");*/
+  if (MODO_DEBUG)
+    Serial.println("change_mode...");
   change_mode_led(true);
 }
-
 
 /**
    Metodo para establecer el brillo, lee el potenciometro y si ha cambiuado el valor respecto a la lectura anterior actualiza
@@ -57,7 +61,8 @@ void change_mode() {
 void check_pt() {
   int sensorValue = analogRead(PIN_BRIGHTNESS);
   // map it to the range of the analog out:
-  int outputValue = map(sensorValue, 0, 1023, 0, 255);
+  int original_value = map(sensorValue, 0, 1023, 0, 255);
+  int outputValue = 255 - original_value;
   //Serial.println(outputValue);
 
   //int outputValue = map(sensorValue, 0, 1023, 200, 2000);  //Map Potentiometer range to frequency range
@@ -65,6 +70,9 @@ void check_pt() {
   if (outputValue != brightness) {
     if (outputValue < 20) // if set to 0 britgness after imposible on
       outputValue = 20;
+    else if (outputValue > 180) // if set to 0 britgness after imposible on
+      outputValue = 250;
+    //Serial.println(outputValue);
     brightness = outputValue;
     strip.setBrightness(brightness); // Set BRIGHTNESS to about (max = 255)
     strip.show();
@@ -117,44 +125,11 @@ void change_mode_led(bool update_mode) {
 
 }
 
-void connect_wifi() {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  //secured_client.setTrustAnchors(&cert); // Add root certificate for api.telegram.org
-
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
-  if (MODO_DEBUG) {
-    Serial.print("\nWiFi connected. IP address: ");
-    Serial.println(WiFi.localIP());
-  }
-  /*
-    Serial.print("Retrieving time: ");
-    configTime(0, 0, "pool.ntp.org"); // get UTC time via NTP
-    time_t now = time(nullptr);
-    while (now < 24 * 3600) {
-    Serial.print(".");
-    delay(100);
-    now = time(nullptr);
-    }
-    Serial.println(now);
-  */
-}
-
 
 // cppcheck-suppress unusedFunction
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  //num_colour = false;r
-  // num_mode = false;
-  Serial.println("start1");
-
-
-  connect_wifi();
-
-
 
   pinMode(BUTTON_COLOUR, INPUT);
   pinMode(BUTTON_MODE, INPUT);
@@ -165,44 +140,73 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_MODE), change_mode1, FALLING); //
 
 
-  Serial.println("start2");
-
-
-#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
-  clock_prescale_set(clock_div_1);
-#endif
-
   // Inicializamos nuestra cinta led RGB
   strip.begin();
-  strip.setBrightness(brightness);
-  strip.show();
-  staticColour(array_colours.get_actual_value());
+
+  //check_pt();
+  //strip.setBrightness(brightness);
+  //strip.show();
+  staticColour(red);
+  
+  
   Serial.println("start3");
   //cascade(strip.Color(150, 0 , 0));
 
-  Serial.println("start3");
+  
+    // attempt to connect to Wifi network:
+    Serial.print("Connecting to Wifi SSID ");
+    Serial.print(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    secured_client.setTrustAnchors(&cert); // Add root certificate for api.telegram.org
 
+    while (WiFi.status() != WL_CONNECTED)  {
+    Serial.print(".");
+    delay(500);
+    }
+    Serial.print("\nWiFi connected. IP address: ");
+    Serial.println(WiFi.localIP());
+    staticColour(yellow);
+
+    Serial.print("Retrieving time: ");
+    configTime(0, 0, "pool.ntp.org"); // get UTC time via NTP
+    time_t now = time(nullptr);
+    while (now < 24 * 3600)  {
+    Serial.print(".");
+    delay(100);
+    now = time(nullptr);
+    }
+    Serial.println(now);
+
+    bot.sendMessage(ID_ADMIN, "starting bot", "");
+    staticColour(array_colours.get_actual_value());
+  
 }
-
 
 // cppcheck-suppress unusedFunction
 void loop() {
-  
+  /*
+    if (millis() - bot_lasttime > BOT_MTBS)  {
+    int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
 
-    
+    while (numNewMessages)    {
+      Serial.println("got response");
+      handleNewMessages(numNewMessages);
+      numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+    }
 
-    check_pt();
+    bot_lasttime = millis();
+    }
+  */
+  check_pt();
 
-    if (is_change_colour) {
+  if (is_change_colour) {
     is_change_colour = false;
     change_colour();
-    }
+  }
 
-    if (is_change_mode) {
+  if (is_change_mode) {
     is_change_mode = false;
     change_mode();
-    }
+  }
 
-  Serial.println("...");
-  delay(500);
 }
