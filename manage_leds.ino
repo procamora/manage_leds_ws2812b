@@ -5,13 +5,10 @@
   @date 14/10/2020
 */
 
-
 #include "manage_leds.h"
 
+
 MyArray<uint32_t> array_colours = set_array_colours();
-
-
-
 
 
 ICACHE_RAM_ATTR void change_colour1() {
@@ -47,10 +44,11 @@ void change_colour() {
 }
 
 void change_mode() {
-  if (MODO_DEBUG)
-    Serial.println("change_mode...");
+  /*if (MODO_DEBUG)
+    Serial.println("change_mode...");*/
   change_mode_led(true);
 }
+
 
 /**
    Metodo para establecer el brillo, lee el potenciometro y si ha cambiuado el valor respecto a la lectura anterior actualiza
@@ -59,18 +57,16 @@ void change_mode() {
 void check_pt() {
   int sensorValue = analogRead(PIN_BRIGHTNESS);
   // map it to the range of the analog out:
-  int original_value = map(sensorValue, 0, 1023, 0, 255);
-  int outputValue = 255 - original_value;
+  int outputValue = map(sensorValue, 0, 1023, 0, 255);
   //Serial.println(outputValue);
 
   //int outputValue = map(sensorValue, 0, 1023, 200, 2000);  //Map Potentiometer range to frequency range
   //sensorValue = sensorValue >> 2; //Map Potentiometer range to 8 bit binary range - this is faster and uses less flash
   if (outputValue != brightness) {
-    if (outputValue < 20) // if set to 0 britgness after imposible on
-      outputValue = 20;
+    if (outputValue < 10) // if set to 0 britgness after imposible on
+      outputValue = 5;
     else if (outputValue > 180) // if set to 0 britgness after imposible on
       outputValue = 250;
-    //Serial.println(outputValue);
     brightness = outputValue;
     strip.setBrightness(brightness); // Set BRIGHTNESS to about (max = 255)
     strip.show();
@@ -123,19 +119,14 @@ void change_mode_led(bool update_mode) {
 
 }
 
-void setup1() {
-  Serial.print(".");
-}
-
-void setup2() {
-  Serial.print(".");
-}
-
 
 // cppcheck-suppress unusedFunction
 void setup() {
   Serial.begin(115200);
   Serial.println();
+  //num_colour = false;
+  // num_mode = false;
+  Serial.println("start1");
 
   pinMode(BUTTON_COLOUR, INPUT);
   pinMode(BUTTON_MODE, INPUT);
@@ -146,69 +137,26 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_MODE), change_mode1, FALLING); //
 
 
+  Serial.println("start2");
+
+
   // Inicializamos nuestra cinta led RGB
   strip.begin();
+
   check_pt();
-  staticColour(red);
 
-
+  staticColour(strip.Color(255, 165, 0));
   Serial.println("start3");
   //cascade(strip.Color(150, 0 , 0));
 
-
-  /*
-    // attempt to connect to Wifi network:
-    Serial.print("Connecting to Wifi SSID ");
-    Serial.print(WIFI_SSID);
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    secured_client.setTrustAnchors(&cert); // Add root certificate for api.telegram.org
-
-    while (WiFi.status() != WL_CONNECTED)  {
-      Serial.print(".");
-      delay(500);
-    }
-    Serial.print("\nWiFi connected. IP address: ");
-    Serial.println(WiFi.localIP());
-    staticColour(yellow);
-
-    Serial.print("Retrieving time: ");
-    configTime(0, 0, "pool.ntp.org"); // get UTC time via NTP
-    time_t now = time(nullptr);
-    while (now < 24 * 3600)  {
-      Serial.print(".");
-      delay(100);
-      now = time(nullptr);
-    }
-    Serial.println(now);
-
-    bot.sendMessage(ID_ADMIN, "starting bot", "");
-  */
-  staticColour(array_colours.get_actual_value());
+  Serial.println("start3");
 
 }
 
-/*
-void checkNewMessages() {
-  if (millis() - bot_lasttime > BOT_MTBS)  {
-    Serial.println(millis());
-    int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
 
-    while (numNewMessages)    {
-      Serial.println("got response");
-      handleNewMessages(numNewMessages);
-      numNewMessages = bot.getUpdates(bot.last_message_received + 1);
-    }
+// cppcheck-suppress unusedFunction
+void loop() {
 
-    bot_lasttime = millis();
-    Serial.println(millis());
-    Serial.println();
-    Serial.println();
-    Serial.println();
-    Serial.println();
-  }
-}*/
-
-void checkChanges() {
   check_pt();
 
   if (is_change_colour) {
@@ -220,11 +168,7 @@ void checkChanges() {
     is_change_mode = false;
     change_mode();
   }
-}
 
-
-// cppcheck-suppress unusedFunction
-void loop() {
-  //checkNewMessages();
-  checkChanges();
+  Serial.println("...");
+  delay(500);
 }
