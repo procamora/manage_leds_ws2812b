@@ -34,14 +34,17 @@ ICACHE_RAM_ATTR void change_mode_interrupt() {
 */
 void check_pt() {
   int sensorValue = analogRead(PIN_BRIGHTNESS);
-  int outputValue = map(sensorValue, 0, 1023, 0, 255);
+  // map it to the range of the analog out:
+  unsigned int outputValue = map(sensorValue, 0, 1023, 0, 255);
   //Serial.println(outputValue);
 
-  if (outputValue != brightness) {
-    if (outputValue < 10) // if set to 0 britgness after imposible on
-      outputValue = 5;
-    else if (outputValue > 180) // if set to 0 britgness after imposible on
-      outputValue = 250;
+  int invert = 255 - outputValue;
+  //Serial.println(invert);
+  if (invert != brightness) {
+    if (invert < 15) // if set to 0 britgness after imposible on
+      invert = 10;
+    else if (invert > 180) // if set to 0 britgness after imposible on
+      invert = 250;
     brightness = outputValue;
     strip.setBrightness(brightness); // Set BRIGHTNESS to about (max = 255)
     strip.show();
