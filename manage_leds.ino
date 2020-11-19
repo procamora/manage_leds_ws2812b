@@ -119,6 +119,9 @@ void change_mode_led(bool update_mode) {
 
 }
 
+void connect_wifi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  //secured_client.setTrustAnchors(&cert); // Add root certificate for api.telegram.org
 
 // cppcheck-suppress unusedFunction
 void setup() {
@@ -127,6 +130,11 @@ void setup() {
   //num_colour = false;
   // num_mode = false;
   Serial.println("start1");
+
+
+  connect_wifi();
+
+
 
   pinMode(BUTTON_COLOUR, INPUT);
   pinMode(BUTTON_MODE, INPUT);
@@ -159,15 +167,19 @@ void loop() {
 
   check_pt();
 
-  if (is_change_colour) {
+    
+
+    check_pt();
+
+    if (is_change_colour) {
     is_change_colour = false;
     change_colour();
-  }
+    }
 
-  if (is_change_mode) {
+    if (is_change_mode) {
     is_change_mode = false;
     change_mode();
-  }
+    }
 
   Serial.println("...");
   delay(500);

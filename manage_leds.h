@@ -5,6 +5,8 @@
 
 
 
+#define BUTTON_COLOUR D5    // the number of the pushbutton pin
+#define BUTTON_MODE D6    // the number of the pushbutton pin
 
 #define BUTTON_COLOUR D5    // the number of the pushbutton pin
 #define BUTTON_MODE D6    // the number of the pushbutton pin
