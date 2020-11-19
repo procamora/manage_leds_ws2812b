@@ -31,13 +31,13 @@ short mode_strip = 0;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN_LEDS, NEO_GRB + NEO_KHZ800);
 
 // Define colours
-uint32_t red = strip.Color(150, 0, 0);
-uint32_t green = strip.Color(0, 150, 0);
-uint32_t blue = strip.Color(0, 0, 150);
-uint32_t yellow = strip.Color(150, 150, 0);
-uint32_t purple = strip.Color(150, 0, 150);
-uint32_t sky_blue = strip.Color(0, 150, 150);
-uint32_t white = strip.Color(150, 150, 150);
+uint32_t red = strip.Color(255, 0, 0);
+uint32_t green = strip.Color(0, 255, 0);
+uint32_t blue = strip.Color(0, 0, 255);
+uint32_t yellow = strip.Color(255, 255, 0);
+uint32_t purple = strip.Color(255, 0, 255);
+uint32_t sky_blue = strip.Color(0, 255, 255);
+uint32_t white = strip.Color(255, 255, 255);
 
 // FIXME comprobar la diferencia entre 155 y 255 en los colores
 MyArray<uint32_t> set_array_colours() {

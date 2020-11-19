@@ -3,11 +3,6 @@
 
 #define MODO_DEBUG true
 
-
-
-#define BUTTON_COLOUR D5    // the number of the pushbutton pin
-#define BUTTON_MODE D6    // the number of the pushbutton pin
-
 #define BUTTON_COLOUR D5    // the number of the pushbutton pin
 #define BUTTON_MODE D6    // the number of the pushbutton pin
 
@@ -19,11 +14,6 @@
 
 #define PIN_BRIGHTNESS A0
 
-
-//#include "credentials.h"
-//#include "telegram.h"
 #include "manage_ws2812b.h"
-
-
 
 #endif
