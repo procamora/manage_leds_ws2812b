@@ -10,10 +10,13 @@
 #ifndef _MYARRAY_H_
 #define _MYARRAY_H_
 
+#include <cstdio>
+
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
-#else
-#include "WProgram.h"
+//#else
+//#include "WProgram.h"
 #endif
 
 template<typename T>
@@ -88,8 +91,9 @@ void MyArray<T>::next_index() {
 template<typename T>
 void MyArray<T>::print() {
   for (int i = 0; i < _capacity; i++) {
-    Serial.print(" ###### => ");
-    Serial.println(_items[i]);
+   // Serial.print(" ###### => ");
+   // Serial.println(_items[i]);
+   ;
   }
 }
 
