@@ -7,23 +7,26 @@
 
 #include "manage_leds.h"
 
+
+
+
 MyManagerWs2812b ws2812b = MyManagerWs2812b();
 
 
-ICACHE_RAM_ATTR void change_colour1() {
-    if (millis() > timeCounter + timeThreshold) {
-        timeCounter = millis();
-        is_change_colour = true;
-        ws2812b.stopMode = true;
-    }
+ICACHE_RAM_ATTR void changeColour() {
+  if (millis() > timeCounter + timeThreshold) {
+    timeCounter = millis();
+    is_change_colour = true;
+    ws2812b.stopMode = true;
+  }
 }
 
-ICACHE_RAM_ATTR void change_mode1() {
-    if (millis() > timeCounter + timeThreshold) {
-        timeCounter = millis();
-        is_change_mode = true;
-        ws2812b.stopMode = true;
-    }
+ICACHE_RAM_ATTR void changeModel() {
+  if (millis() > timeCounter + timeThreshold) {
+    timeCounter = millis();
+    is_change_mode = true;
+    ws2812b.stopMode = true;
+  }
 }
 
 
@@ -32,61 +35,55 @@ ICACHE_RAM_ATTR void change_mode1() {
    el valor y establece el nuevo brillo
 */
 void check_pt() {
-    int sensorValue = analogRead(PIN_BRIGHTNESS);
-    // map it to the range of the analog out:
-    unsigned int outputValue = map(sensorValue, 0, 1023, 0, 255);
-    //Serial.println(outputValue);
+  int sensorValue = analogRead(PIN_BRIGHTNESS);
+  // map it to the range of the analog out:
+  unsigned int outputValue = map(sensorValue, 0, 1023, 0, 255);
+  //Serial.println(outputValue);
 
-    //int outputValue = map(sensorValue, 0, 1023, 200, 2000);  //Map Potentiometer range to frequency range
-    //sensorValue = sensorValue >> 2; //Map Potentiometer range to 8 bit binary range - this is faster and uses less flash
-    if (outputValue != ws2812b.getBrightness()) {
-        if (outputValue < 10) // if set to 0 britgness after imposible on
-            outputValue = 5;
-        else if (outputValue > 180) // if set to 0 britgness after imposible on
-            outputValue = 250;
-        ws2812b.updateBrightness(outputValue);
-    }
+  int invert = 255 - outputValue;
+  //Serial.println(invert);
+  if (invert != ws2812b.getBrightnessStrip()) {
+    if (invert < 15) // if set to 0 britgness after imposible on
+      invert = 10;
+    else if (invert > 180) // if set to 0 britgness after imposible on
+      invert = 250;
+    ws2812b.updateBrightness(invert);
+  }
 }
 
 // cppcheck-suppress unusedFunction
 void setup() {
-    Serial.begin(115200);
-    Serial.println();
-    //num_colour = false;
-    // num_mode = false;
-    Serial.println("start1");
+  Serial.begin(115200);
+  Serial.println();
 
-    pinMode(BUTTON_COLOUR, INPUT);
-    pinMode(BUTTON_MODE, INPUT);
-    pinMode(PIN_BRIGHTNESS, INPUT);
+  pinMode(BUTTON_COLOUR, INPUT);
+  pinMode(BUTTON_MODE, INPUT);
+  pinMode(PIN_BRIGHTNESS, INPUT);
 
-    //https://www.luisllamas.es/que-son-y-como-usar-interrupciones-en-arduino/
-    //attachInterrupt(digitalPinToInterrupt(BUTTON_COLOUR), change_colour1, FALLING); //
-    //attachInterrupt(digitalPinToInterrupt(BUTTON_MODE), change_mode1, FALLING); //
+  //https://www.luisllamas.es/que-son-y-como-usar-interrupciones-en-arduino/
+  attachInterrupt(digitalPinToInterrupt(BUTTON_COLOUR), changeColour, FALLING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_MODE), changeModel, FALLING);
 
-    Serial.println("start2");
-    ws2812b.start();
-    Serial.println("start3");
+  Serial.println("start2");
+  ws2812b.start();
+  ws2812b.colourError();
+  Serial.println("start3");
 }
 
 
 // cppcheck-suppress unusedFunction
 void loop() {
+  Serial.println(ws2812b.getBrightnessStrip());
+  check_pt();
 
-  delay(500);
-  ws2812b.getBrightness();
-    /*check_pt();
+  if (is_change_colour) {
+    is_change_colour = false;
+    ws2812b.changeColour();
+  }
 
-    if (is_change_colour) {
-        is_change_colour = false;
-        ws2812b.changeColour();
-    }
+  if (is_change_mode) {
+    is_change_mode = false;
+    ws2812b.changeMode();
+  }
 
-    if (is_change_mode) {
-        is_change_mode = false;
-        ws2812b.changeMode();
-    }*/
-
-    Serial.println("...");
-    delay(500);
 }

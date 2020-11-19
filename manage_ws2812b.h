@@ -13,7 +13,7 @@
 
 
 class MyManagerWs2812b {
-public:
+  public:
     MyManagerWs2812b();
 
     ~MyManagerWs2812b();
@@ -22,13 +22,12 @@ public:
 
     void updateBrightness(int newBrightness);
 
-    unsigned int getBrightness() const;
-
+    unsigned int getBrightnessStrip() const;
 
     void changeMode();
 
     void changeColour();
-
+    void colourError();
 
     volatile bool stopMode = false; //variable usada en interupciones
     // pixels.Color toma valores en RGB, desde 0,0,0 hasta 255,255,255
@@ -39,7 +38,7 @@ public:
     uint32_t purple = Adafruit_NeoPixel::Color(255, 0, 255);
     uint32_t sky_blue = Adafruit_NeoPixel::Color(0, 255, 255);
     uint32_t white = Adafruit_NeoPixel::Color(255, 255, 255);
-private:
+  private:
     Adafruit_NeoPixel strip;
     MyArray<uint32_t> arrayColours = MyArray<uint32_t>(7);
     unsigned int brightness = 50;
