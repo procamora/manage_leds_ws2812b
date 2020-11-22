@@ -10,7 +10,7 @@
 #ifndef _MYARRAY_H_
 #define _MYARRAY_H_
 
-#include <cstdio>
+//#include <cstdio>
 
 
 #if defined(ARDUINO) && ARDUINO >= 100

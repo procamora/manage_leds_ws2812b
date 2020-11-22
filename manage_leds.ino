@@ -8,15 +8,13 @@
 #include "manage_leds.h"
 
 
-
-
-MyManagerWs2812b ws2812b = MyManagerWs2812b();
+MyManagerWs2812b ws2812b;
 
 
 ICACHE_RAM_ATTR void changeColour() {
   if (millis() > timeCounter + timeThreshold) {
     timeCounter = millis();
-    is_change_colour = true;
+    ws2812b.isChangeColour = true;
     ws2812b.stopMode = true;
   }
 }
@@ -24,7 +22,7 @@ ICACHE_RAM_ATTR void changeColour() {
 ICACHE_RAM_ATTR void changeModel() {
   if (millis() > timeCounter + timeThreshold) {
     timeCounter = millis();
-    is_change_mode = true;
+    ws2812b.isChangeMode = true;
     ws2812b.stopMode = true;
   }
 }
@@ -42,14 +40,15 @@ void check_pt() {
 
   int invert = 255 - outputValue;
   //Serial.println(invert);
-  if (invert != ws2812b.getBrightnessStrip()) {
+  if (invert != ws2812b.getBrightness()) {
     if (invert < 15) // if set to 0 britgness after imposible on
       invert = 10;
     else if (invert > 180) // if set to 0 britgness after imposible on
       invert = 250;
-    ws2812b.updateBrightness(invert);
+    ws2812b.setBrightness(invert);
   }
 }
+
 
 // cppcheck-suppress unusedFunction
 void setup() {
@@ -64,26 +63,26 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_COLOUR), changeColour, FALLING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_MODE), changeModel, FALLING);
 
-  Serial.println("start2");
   ws2812b.start();
-  ws2812b.colourError();
-  Serial.println("start3");
+
+  ws2812b.modeColourError();
+  delay(500);
 }
 
 
 // cppcheck-suppress unusedFunction
 void loop() {
-  Serial.println(ws2812b.getBrightnessStrip());
+  Serial.println(ws2812b.getBrightness());
   check_pt();
 
-  if (is_change_colour) {
-    is_change_colour = false;
+  if (ws2812b.isChangeColour) {
+    ws2812b.isChangeColour = false;
     ws2812b.changeColour();
   }
 
-  if (is_change_mode) {
-    is_change_mode = false;
+  if (ws2812b.isChangeMode) {
+    ws2812b.isChangeMode = false;
     ws2812b.changeMode();
   }
-
+  delay(50);
 }
